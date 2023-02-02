@@ -48,7 +48,7 @@ def sine_data_generation (samples_no = 100, seq_len = 1000, dim = 20):
     shifted_data = window_shift(data, samples_no)
     return data, shifted_data
 
-def real_data_loading (data_name, seq_len, is_differenced = False, scaler_name = 'MinMax'):
+def real_data_loading (seq_len, is_differenced = False, scaler_name = 'MinMax'):
     """
     Load and preprocess real-world datasets.
     Args:
@@ -61,17 +61,11 @@ def real_data_loading (data_name, seq_len, is_differenced = False, scaler_name =
         - scaler: the fitted scaler
         - ori_data_: the original raw data
     """
-    assert data_name in ['stock','energy','all_intel']
-
-    if data_name == 'stock':
-        ori_data_ = np.loadtxt('../data/stock_data.csv', delimiter = ",",skiprows = 1)
-    elif data_name == 'energy':
-        ori_data_ = np.loadtxt('../data/energy_data.csv', delimiter = ",",skiprows = 1)
-    elif data_name == 'all_intel':
-        ori_data_ = pd.read_csv('../data/datatraining.txt').reset_index(drop = True)
-         
-        ori_data_ = ori_data_[['Temperature', 'CO2', 'Humidity', 'Occupancy']]
-        ori_data_ = ori_data_.reset_index(drop=True)
+    
+    ori_data_ = pd.read_csv('../data/datatraining.txt').reset_index(drop = True)
+        
+    ori_data_ = ori_data_[['Temperature', 'CO2', 'Humidity']]
+    ori_data_ = ori_data_.reset_index(drop=True)
 
     ori_data = np.copy(ori_data_)
 
