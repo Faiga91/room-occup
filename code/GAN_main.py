@@ -14,22 +14,15 @@ import torch
 # pylint: disable=E0401
 from data_loading import real_data_loading, sine_data_generation
 
-from sensegan_star import get_noise
-from sensegan_star import Generator, Discriminator
+from GAN_model import get_noise
+from GAN_model import Generator, Discriminator
 
-# pylint: disable=W0401 W0614
-from loss_functions import *
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath('__file__')) + 'Code/'
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-dispatcher = {'gan_gloss': gan_gloss, 'gan_dloss': gan_dloss,
-                  'lsgan_gloss': lsgan_gloss, 'lsgan_dloss': lsgan_dloss,
-                  'wgan_gloss': wgan_gloss, 'wgan_dloss': wgan_dloss,
-                  'wgan_gp_gloss': wgan_gloss, 'wgan_gp_dloss': wgan_gp_dloss,
-                  'dragan_gloss': gan_gloss, 'dragan_dloss': wgan_gp_dloss}
 
 def main(args):
     """
