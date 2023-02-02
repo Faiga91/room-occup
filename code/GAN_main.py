@@ -14,22 +14,30 @@ import torch
 # pylint: disable=E0401
 from data_loading import real_data_loading, sine_data_generation
 
-from sensegan_star import get_noise
-from sensegan_star import Generator, Discriminator
+from GAN_model import get_noise
+from GAN_model import Generator, Discriminator
 
-# pylint: disable=W0401 W0614
-from loss_functions import *
+from torch import nn
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath('__file__')) + 'Code/'
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-dispatcher = {'gan_gloss': gan_gloss, 'gan_dloss': gan_dloss,
-                  'lsgan_gloss': lsgan_gloss, 'lsgan_dloss': lsgan_dloss,
-                  'wgan_gloss': wgan_gloss, 'wgan_dloss': wgan_dloss,
-                  'wgan_gp_gloss': wgan_gloss, 'wgan_gp_dloss': wgan_gp_dloss,
-                  'dragan_gloss': gan_gloss, 'dragan_dloss': wgan_gp_dloss}
+criterion = nn.BCEWithLogitsLoss()
+
+def gan_gloss(disc_fake_pred):
+    # Flip the labels (fake = real)  
+    gloss = criterion(disc_fake_pred, torch.ones_like(disc_fake_pred))
+    return gloss
+
+def gan_dloss(disc_fake_pred, disc_real_pred):
+    disc_fake_loss = criterion(disc_fake_pred, torch.zeros_like(disc_fake_pred))
+    disc_real_loss = criterion(disc_real_pred, torch.ones_like(disc_real_pred))
+
+    dloss = disc_fake_loss + disc_real_loss
+
+    return dloss 
 
 def main(args):
     """
@@ -48,7 +56,7 @@ def main(args):
     if args.data_name == 'sine_wave':
         _, ori_data = sine_data_generation(samples_no = 1, seq_len = 1e6)
     else:
-        ori_data, _ , _ = real_data_loading(args.data_name, args.seq_len,
+        ori_data, _ , _ = real_data_loading(args.seq_len,
                                                     scaler_name=args.scaler_name)
 
     ori_data = torch.FloatTensor(np.asarray(ori_data))
@@ -73,8 +81,8 @@ def main(args):
     g_losses = []
     d_losses = []
 
-    gloss_fun = dispatcher[args.loss_fun + '_gloss']
-    dloss_fun = dispatcher[args.loss_fun + '_dloss']
+    gloss_fun = gan_gloss
+    dloss_fun = gan_dloss
 
     # Start the training loop
     for epoch in range(args.n_epochs):
@@ -133,11 +141,11 @@ def main(args):
         g_losses.append(gen_loss.detach().cpu().numpy())
         d_losses.append(disc_loss.detach().cpu().numpy())
 
-    torch.save(gen, '../Results/9nov/' + args.model_name + '_' + args.loss_fun + '.pkl')
+    torch.save(gen, '../results/' + args.model_name + '_' + args.loss_fun + '.pkl')
 
-    np.savetxt('../Results/9nov/G_' +  args.model_name + '_' + args.loss_fun + '.csv',
+    np.savetxt('../results/G_' +  args.model_name + '_' + args.loss_fun + '.csv',
                np.asarray(g_losses), delimiter=',')
-    np.savetxt('../Results/9nov/D_'  +  args.model_name + '_'  + args.loss_fun + '.csv',
+    np.savetxt('../results/D_'  +  args.model_name + '_'  + args.loss_fun + '.csv',
                np.asarray(d_losses), delimiter=',')
 
 

@@ -3,3 +3,5 @@
 data/.ipynb_checkpoints/datatest-checkpoint.txt
 code/__pycache__/myplots.cpython-310.pyc
 code/__pycache__/RF_classification.cpython-310.pyc
+code/__pycache__/GAN_model.cpython-310.pyc
+code/__pycache__/data_loading.cpython-310.pyc
